@@ -1,4 +1,4 @@
-name: CI geeup
+name: CI pycoral
 
 on:
   push:
