@@ -58,7 +58,7 @@ optional arguments:
 ```
 
 ### auth
-The auth or authentication tool allows the user to use their name and password used for loging into Allen Coral Atlas. This is stored locally and a bearer token is generated everytime the tool is being usef from the saved credentials.
+The auth or authentication tool allows the user to use their name and password used for logging into Allen Coral Atlas. This is stored locally and a bearer token is generated everytime the tool is being used from the saved credentials.
 
 ![pycoral_auth](https://user-images.githubusercontent.com/6677629/118433326-5d397000-b6a0-11eb-9078-905064bcd244.gif)
 
@@ -85,7 +85,7 @@ This tool allows the user to delete any AOI from the my areas space based on eit
 ![pycoral_aoi-delete](https://user-images.githubusercontent.com/6677629/118433379-780be480-b6a0-11eb-8420-33708e4bac6a.gif)
 
 ### aoi-download
-The download tool can only be utilized for area of interest that have been saved to my areas. As such this tool utilizes either the AOI name or ID. This submits the reuqest and then waits for zipping to complete to then download a single zip files with all sources.
+The download tool can only be utilized for area of interest that have been saved to my areas. As such this tool utilizes either the AOI name or ID. This submits the request and then waits for zipping to complete to then download a single zip files with all sources.
 
 ![pycoral_aoi-download](https://user-images.githubusercontent.com/6677629/118433385-7e9a5c00-b6a0-11eb-87cd-d84b81960757.gif)
 
