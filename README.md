@@ -58,13 +58,42 @@ optional arguments:
 ```
 
 ### auth
+The auth or authentication tool allows the user to use their name and password used for loging into Allen Coral Atlas. This is stored locally and a bearer token is generated everytime the tool is being usef from the saved credentials.
+
+![pycoral_auth](https://user-images.githubusercontent.com/6677629/118433326-5d397000-b6a0-11eb-9078-905064bcd244.gif)
 
 ### aoi-find
+The aoi-find tool can be handy if you are looking for a specific aoi-name and is mostly useful to list all allowed polygons including those that are default or stored by the atlas vs your own areas of interest.
+
+![pycoral_aoi-find](https://user-images.githubusercontent.com/6677629/118433340-6296ba80-b6a0-11eb-83f3-e2376f4fa5a6.gif)
 
 ### aoi-create
+It is possible to simply pass a geometry GeoJSON file to save this to your My area space and once created it returns an ID which can then be used as either/or to generate stats or download data. While the atlas allows you to use the same name multiple times and is non unique, to avoid any confusion, the tool checks if a area of interest (aoi) exists with the same name and if yes then suggests you to change the name. This allows you to keep names distinct.
+
+![pycoral_aoi-create](https://user-images.githubusercontent.com/6677629/118433354-69bdc880-b6a0-11eb-94d8-312a725fa29e.gif)
 
 ### aoi-stat
+This tool allows you to get to the stats for an area of interest. The area of interest can be passed as ether a name, an ID , or as a geometry GeoJSON file. Depending on the size of the geometry it might take time to run the analysis. Since the atlas needs you to save your area of interest if the area is larger than 100 sqkm, this checks for area constraints and if the area is larger then it creates a temporary AOI.
+
+To avoid asking the user for a AOI name, it uses the current local timestamp and encodes it into a unique string and returns to you the ID for the AOI along with the stats after a while.
+
+![pycoral_aoi-stat](https://user-images.githubusercontent.com/6677629/118433364-6fb3a980-b6a0-11eb-9387-2495ae185b45.gif)
 
 ### aoi-delete
+This tool allows the user to delete any AOI from the my areas space based on either a name or the AOI id. The AOI name or ID must exist in your my areas list.
+
+![pycoral_aoi-delete](https://user-images.githubusercontent.com/6677629/118433379-780be480-b6a0-11eb-8420-33708e4bac6a.gif)
 
 ### aoi-download
+The download tool can only be utilized for area of interest that have been saved to my areas. As such this tool utilizes either the AOI name or ID. This submits the reuqest and then waits for zipping to complete to then download a single zip files with all sources.
+
+![pycoral_aoi-download](https://user-images.githubusercontent.com/6677629/118433385-7e9a5c00-b6a0-11eb-87cd-d84b81960757.gif)
+
+
+## Changelog
+
+### v0.0.4
+- Added aoi-delete capability along with create using GeoJSON and unique name check.
+- Added local timestamp based unique name generator to AOI stats tool and checks to see if mapped area.
+- Stability test across python3.6 to 3.9 and for all OS types built into CI
+- Updated docs and code cleanup.
