@@ -6,9 +6,9 @@ def readme():
         return f.read()
 setuptools.setup(
     name='pycoral',
-    version='0.0.5',
+    version='0.0.6',
     packages=find_packages(),
-    install_requires=['requests>=2.23.1','progressbar2>=3.53.1','area>=1.1.1','geojson>=2.4.1'],
+    install_requires=['requests>=2.23.1','progressbar2>=3.53.1','area>=1.1.1','geojson>=2.4.1','beautifulsoup4>= 4.9.0',],
     license='MIT',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

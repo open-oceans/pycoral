@@ -30,6 +30,7 @@ SOFTWARE.
 __license__ = "MIT License"
 
 import requests
+import pkg_resources
 import json
 import getpass
 import sys
@@ -39,8 +40,84 @@ import argparse
 import time
 import base64
 import os
+import webbrowser
 from area import area
 from os.path import expanduser
+from bs4 import BeautifulSoup
+
+
+class Solution:
+    def compareVersion(self, version1, version2):
+        versions1 = [int(v) for v in version1.split(".")]
+        versions2 = [int(v) for v in version2.split(".")]
+        for i in range(max(len(versions1), len(versions2))):
+            v1 = versions1[i] if i < len(versions1) else 0
+            v2 = versions2[i] if i < len(versions2) else 0
+            if v1 > v2:
+                return 1
+            elif v1 < v2:
+                return -1
+        return 0
+
+
+ob1 = Solution()
+
+# Get package version
+def pycoral_version():
+    url = "https://pypi.org/project/pycoral/"
+    source = requests.get(url)
+    html_content = source.text
+    soup = BeautifulSoup(html_content, "html.parser")
+    company = soup.find("h1")
+    vcheck = ob1.compareVersion(
+        company.string.strip().split(" ")[-1],
+        pkg_resources.get_distribution("pycoral").version,
+    )
+    if vcheck == 1:
+        print(
+            "\n"
+            + "========================================================================="
+        )
+        print(
+            "Current version of pycoral is {} upgrade to lastest version: {}".format(
+                pkg_resources.get_distribution("pycoral").version,
+                company.string.strip().split(" ")[-1],
+            )
+        )
+        print(
+            "========================================================================="
+        )
+    elif vcheck == -1:
+        print(
+            "\n"
+            + "========================================================================="
+        )
+        print(
+            "Possibly running staging code {} compared to pypi release {}".format(
+                pkg_resources.get_distribution("pycoral").version,
+                company.string.strip().split(" ")[-1],
+            )
+        )
+        print(
+            "========================================================================="
+        )
+
+
+pycoral_version()
+
+# Go to the readMe
+def readme():
+    try:
+        a = webbrowser.open("https://samapriya.github.io/pycoral/", new=2)
+        if a == False:
+            print("Your setup does not have a monitor to display the webpage")
+            print(" Go to {}".format("https://samapriya.github.io/pycoral/"))
+    except Exception as e:
+        print(e)
+
+
+def read_from_parser(args):
+    readme()
 
 
 # set credentials
@@ -204,7 +281,7 @@ def poly_delete(id):
         f"https://allencoralatlas.org/mapping/aois/{id}", headers=headers
     )
     if response.status_code == 200:
-        print(f'Deleted {id} successfully')
+        print(f"Deleted {id} successfully")
     else:
         print(f"No results for name or id {id}: returned {response.status_code}")
 
@@ -342,6 +419,11 @@ def poly_download_from_parser(args):
 def main(args=None):
     parser = argparse.ArgumentParser(description="Simple CLI for Allen Coral Atlas")
     subparsers = parser.add_subparsers()
+
+    parser_read = subparsers.add_parser(
+        "readme", help="Go to the web based pycoral readme page"
+    )
+    parser_read.set_defaults(func=read_from_parser)
 
     parser_auth = subparsers.add_parser("auth", help="Saves your username and password")
     parser_auth.set_defaults(func=auth_from_parser)

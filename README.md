@@ -14,6 +14,8 @@ Samapriya Roy. (2021, May 19). samapriya/pycoral: Simple CLI for Allen Coral Atl
 Zenodo. http://doi.org/10.5281/zenodo.4771298
 ```
 
+Readme Docs [available online](https://samapriya.github.io/pycoral)
+
 ## Table of contents
 * [Getting started](#getting-started)
     * [auth](#auth)
@@ -46,13 +48,14 @@ python setup.py install
 
 ```
 usage: pycoral [-h]
-                  {auth,aoi-find,aoi-create,aoi-stat,aoi-delete,aoi-download}
-                  ...
+               {readme,auth,aoi-find,aoi-create,aoi-stat,aoi-delete,aoi-download}
+               ...
 
 Simple CLI for Allen Coral Atlas
 
 positional arguments:
-  {auth,aoi-find,aoi-create,aoi-stat,aoi-delete,aoi-download}
+  {readme,auth,aoi-find,aoi-create,aoi-stat,aoi-delete,aoi-download}
+    readme              Go to the web based pycoral readme page
     auth                Saves your username and password
     aoi-find            Find AOI name and ID or list all
     aoi-create          Use a GeoJSON geometry file to create My Area AOI
@@ -99,6 +102,10 @@ The download tool can only be utilized for area of interest that have been saved
 
 
 ## Changelog
+
+#### v0.0.6
+- Added auto version check to the tool.
+- Added a web based readme site for the tool for ease of use.
 
 #### v0.0.5
 - Captures products available for download for parsing product type.
