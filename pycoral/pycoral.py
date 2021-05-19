@@ -204,7 +204,7 @@ def poly_delete(id):
         f"https://allencoralatlas.org/mapping/aois/{id}", headers=headers
     )
     if response.status_code == 200:
-        print(response.json()["data"])
+        print(f'Deleted {id} successfully')
     else:
         print(f"No results for name or id {id}: returned {response.status_code}")
 
@@ -310,17 +310,15 @@ def poly_download(id, local_path):
         "authorization": "Bearer {}".format(bearer),
     }
 
-    data = {
-        "datasets": {
-            "738048a6-3720-4be1-8935-4e1156dbf490": "geojson",
-            "56f5cc09-d513-440d-ab90-696a230580de": "csv",
-            "11fd0780-005e-4229-86f0-7706e385d3ea": "tiff",
-            "a7585f40-e2c4-4c5f-8ec5-d2bdf0e1a2ec": "geojson",
-            "449b92fd-1f35-4951-b463-f0893e074e13": "geojson",
-            "130d0101-c1d7-4c0b-8e42-de86918bdb0d": "tiff",
-            "2bc7e8fd-173e-46d2-875a-21a406750d86": "tiff",
-        }
-    }
+    data = {"datasets": "empty"}
+    product_dict = {}
+    response = requests.get(
+        f"https://allencoralatlas.org/mapping/aois/{id}/products", headers=headers
+    )
+    for products in response.json()["data"]:
+        if products["allow_downloads"] == True:
+            product_dict[products["uuid"]] = products["options"]["default_format"]
+    data["datasets"] = product_dict
     response = requests.post(
         f"https://allencoralatlas.org/download/aois/{id}",
         headers=headers,
