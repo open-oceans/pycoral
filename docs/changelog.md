@@ -1,5 +1,9 @@
 # Changelog
 
+#### v0.0.6
+- Added auto version check to the tool.
+- Added a web based readme site for the tool for ease of use.
+
 #### v0.0.5
 - Captures products available for download for parsing product type.
 - For now chooses default product type only.
