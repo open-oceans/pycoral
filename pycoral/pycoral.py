@@ -345,7 +345,7 @@ def poly_stat_from_parser(args):
 
 
 def downloader(url, local_path):
-    response = requests.get(url)
+    response = requests.request('HEAD',url)
     filename = url.split("/")[-1]
     local_path = os.path.join(local_path, filename)
     print("Waiting for zip file to complete ...")
@@ -353,9 +353,10 @@ def downloader(url, local_path):
         bar = progressbar.ProgressBar()
         for _ in bar(range(60)):
             time.sleep(1)
-        response = requests.get(url)
+        response = requests.request('HEAD',url)
     if not os.path.exists(local_path) and response.status_code == 200:
         print(f"Downloading to :{local_path}")
+        response=requests.get(url)
         f = open(local_path, "wb")
         for chunk in response.iter_content(chunk_size=512 * 1024):
             if chunk:
@@ -372,7 +373,7 @@ def downloader(url, local_path):
             print(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
 
 
-def poly_download(id, local_path):
+def poly_download(id, local_path,format):
     if id is not None:
         if id.isdigit():
             id = str(id)
@@ -394,7 +395,10 @@ def poly_download(id, local_path):
     )
     for products in response.json()["data"]:
         if products["allow_downloads"] == True:
-            product_dict[products["uuid"]] = products["options"]["default_format"]
+            if format in products["options"]["valid_formats"]:
+                product_dict[products["uuid"]] = format
+            else:
+                product_dict[products["uuid"]] = products["options"]["default_format"]
     data["datasets"] = product_dict
     response = requests.post(
         f"https://allencoralatlas.org/download/aois/{id}",
@@ -413,7 +417,7 @@ def poly_download(id, local_path):
 
 
 def poly_download_from_parser(args):
-    poly_download(id=args.aoi, local_path=args.local)
+    poly_download(id=args.aoi, local_path=args.local,format=args.format)
 
 
 def main(args=None):
@@ -473,6 +477,8 @@ def main(args=None):
     required_named.add_argument(
         "--local", help="Full path to folder to download files", required=True
     )
+    optional_named = parser_poly_download.add_argument_group("Optional named arguments")
+    optional_named.add_argument("--format", help="Format types 'geojson', 'kml', 'shp', 'gpkg'", default=None)
     parser_poly_download.set_defaults(func=poly_download_from_parser)
 
     args = parser.parse_args()

@@ -100,8 +100,17 @@ The download tool can only be utilized for area of interest that have been saved
 
 ![pycoral_aoi-download](https://user-images.githubusercontent.com/6677629/118433385-7e9a5c00-b6a0-11eb-87cd-d84b81960757.gif)
 
+You can also specify a format now since v0.0.7
+
+![aoi_download_format](https://user-images.githubusercontent.com/6677629/119296374-6b4a3c00-bc1e-11eb-85d9-df5f476dbbf7.gif)
+
 
 ## Changelog
+
+#### v0.0.7
+- Uses requests head to estimate zip completion for download.
+- Added option to download data in specific format kml,geojson,shp or gpkg.
+- Improved notification for download tool
 
 #### v0.0.6
 - Added auto version check to the tool.

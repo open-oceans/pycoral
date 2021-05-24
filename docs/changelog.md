@@ -1,5 +1,10 @@
 # Changelog
 
+#### v0.0.7
+- Uses requests head to estimate zip completion for download.
+- Added option to download data in specific format kml,geojson,shp or gpkg.
+- Improved notification for download tool
+
 #### v0.0.6
 - Added auto version check to the tool.
 - Added a web based readme site for the tool for ease of use.
