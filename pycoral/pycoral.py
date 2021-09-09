@@ -319,16 +319,19 @@ def poly_stat(id, filepath):
                 data=json.dumps(data),
             )
         else:
+            print('AOI area exceeds 100 sqkm: Creating Polygon to run stats')
             current_timestamp = str(time.time())
             message_bytes = current_timestamp.encode("ascii")
             base64_bytes = base64.b64encode(message_bytes)
             name = base64_bytes.decode("ascii")
             id = poly_create(filepath, name)
-            print("Allow for stats to run")
-            time.sleep(10)
             response = requests.get(
                 f"https://allencoralatlas.org/mapping/aois/{id}/stats", headers=headers
             )
+            while response.status_code !=200:
+                time.sleep(5)
+                response = requests.get(
+                f"https://allencoralatlas.org/mapping/aois/{id}/stats", headers=headers)
     else:
         sys.exit("Pass valid geometry, name or ID")
     if response.status_code == 200:

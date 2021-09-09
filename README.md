@@ -112,6 +112,10 @@ You can also specify a format now since v0.0.7
 
 ## Changelog
 
+#### v0.0.8
+- Better handles stats request.
+- Prints info if AOI exceeds 100 sqkm.
+
 #### v0.0.7
 - Uses requests head to estimate zip completion for download.
 - Added option to download data in specific format kml,geojson,shp or gpkg.
