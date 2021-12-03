@@ -1,5 +1,9 @@
 # pycoral: Simple CLI for Allen Coral Atlas
 
+[![Twitter URL](https://img.shields.io/twitter/follow/samapriyaroy?style=social)](https://twitter.com/intent/follow?screen_name=samapriyaroy)
+[![Hits-of-Code](https://hitsofcode.com/github/samapriya/pycoral?branch=main)](https://hitsofcode.com/github/samapriya/pycoral?branch=main)
+![PyPI - License](https://img.shields.io/pypi/l/pycoral)
+[![Downloads](https://pepy.tech/badge/pycoral)](https://pepy.tech/project/pycoral)
 [![CI pycoral](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml/badge.svg)](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5497093.svg)](https://doi.org/10.5281/zenodo.5497093)
 
@@ -10,6 +14,6 @@ The Allen Coral Atlas was conceived and funded by the late Paul Allen’s Vulcan
 #### Citation
 
 ```
-Samapriya Roy. (2021). samapriya/pycoral: Simple CLI for Allen Coral Atlas (0.0.8).
-Zenodo. https://doi.org/10.5281/zenodo.5497093
+Samapriya Roy. (2021). samapriya/pycoral: Simple CLI for Allen Coral Atlas (0.0.9).
+Zenodo. https://doi.org/10.5281/zenodo.5752074
 ```
