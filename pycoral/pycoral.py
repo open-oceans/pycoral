@@ -180,7 +180,7 @@ def poly_list(name):
     bearer = tokenize()
     headers = {
         "authority": "allencoralatlas.org",
-        "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
         "authorization": "Bearer {}".format(bearer),
     }
     response = requests.get(
@@ -199,7 +199,9 @@ def poly_list(name):
                     print("")
                     return things["id"]
     else:
-        print(response.status_code)
+        print(
+            f"Failed to fetch default or user areas with response : {response.status_code}"
+        )
 
 
 def poly_list_from_parser(args):
@@ -228,7 +230,7 @@ def poly_create(filepath, name):
     bearer = tokenize()
     headers = {
         "authority": "allencoralatlas.org",
-        "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
         "authorization": "Bearer {}".format(bearer),
     }
     with open(filepath) as f:
@@ -255,8 +257,9 @@ def poly_create(filepath, name):
         )
         return response.json()["data"]["id"]
     else:
-        print(response.status_code)
-        print(response.string)
+        print(
+            f"Create failed with response {response.status_code} and error message {response.string}"
+        )
 
 
 def poly_create_from_parser(args):
@@ -274,7 +277,7 @@ def poly_delete(id):
     bearer = tokenize()
     headers = {
         "authority": "allencoralatlas.org",
-        "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
         "authorization": "Bearer {}".format(bearer),
     }
     response = requests.delete(
@@ -294,7 +297,7 @@ def poly_stat(id, filepath):
     bearer = tokenize()
     headers = {
         "authority": "allencoralatlas.org",
-        "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
         "authorization": "Bearer {}".format(bearer),
     }
     if id is not None:
@@ -319,7 +322,7 @@ def poly_stat(id, filepath):
                 data=json.dumps(data),
             )
         else:
-            print('AOI area exceeds 100 sqkm: Creating Polygon to run stats')
+            print("AOI area exceeds 100 sqkm: Creating Polygon to run stats")
             current_timestamp = str(time.time())
             message_bytes = current_timestamp.encode("ascii")
             base64_bytes = base64.b64encode(message_bytes)
@@ -328,10 +331,12 @@ def poly_stat(id, filepath):
             response = requests.get(
                 f"https://allencoralatlas.org/mapping/aois/{id}/stats", headers=headers
             )
-            while response.status_code !=200:
+            while response.status_code != 200:
                 time.sleep(5)
                 response = requests.get(
-                f"https://allencoralatlas.org/mapping/aois/{id}/stats", headers=headers)
+                    f"https://allencoralatlas.org/mapping/aois/{id}/stats",
+                    headers=headers,
+                )
     else:
         sys.exit("Pass valid geometry, name or ID")
     if response.status_code == 200:
@@ -348,35 +353,40 @@ def poly_stat_from_parser(args):
 
 
 def downloader(url, local_path):
-    response = requests.request('HEAD',url)
+    response = requests.request("HEAD", url)
     filename = url.split("/")[-1]
     local_path = os.path.join(local_path, filename)
     print("Waiting for zip file to complete ...")
-    while response.status_code != 200:
-        bar = progressbar.ProgressBar()
-        for _ in bar(range(60)):
-            time.sleep(1)
-        response = requests.request('HEAD',url)
-    if not os.path.exists(local_path) and response.status_code == 200:
-        print(f"Downloading to :{local_path}")
-        response=requests.get(url)
-        f = open(local_path, "wb")
-        for chunk in response.iter_content(chunk_size=512 * 1024):
-            if chunk:
-                f.write(chunk)
-        f.close()
-    elif response.status_code == 429:
-        raise Exception("rate limit error")
-    else:
-        if int(response.status_code) != 200:
-            print(
-                f"Encountered error with code: {result.status_code} for {os.path.split(items['name'])[-1]}"
-            )
-        elif int(response.status_code) == 200:
-            print(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
+    try:
+        while response.status_code != 200:
+            bar = progressbar.ProgressBar()
+            for _ in bar(range(60)):
+                time.sleep(1)
+            response = requests.request("HEAD", url)
+        if not os.path.exists(local_path) and response.status_code == 200:
+            print(f"Downloading to :{local_path}")
+            response = requests.get(url)
+            f = open(local_path, "wb")
+            for chunk in response.iter_content(chunk_size=512 * 1024):
+                if chunk:
+                    f.write(chunk)
+            f.close()
+        elif response.status_code == 429:
+            raise Exception("rate limit error")
+        else:
+            if int(response.status_code) != 200:
+                print(
+                    f"Encountered error with code: {result.status_code} for {os.path.split(items['name'])[-1]}"
+                )
+            elif int(response.status_code) == 200:
+                print(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
+    except Exception as e:
+        print(e)
+    except KeyboardInterrupt:
+        sys.exit("\n" + "Exited by user")
 
 
-def poly_download(id, local_path,format):
+def poly_download(id, local_path, format):
     if id is not None:
         if id.isdigit():
             id = str(id)
@@ -387,10 +397,47 @@ def poly_download(id, local_path,format):
     bearer = tokenize()
     headers = {
         "authority": "allencoralatlas.org",
-        "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
         "authorization": "Bearer {}".format(bearer),
     }
-
+    aoi_check = requests.get(
+        f"https://allencoralatlas.org/mapping/aois/{id}", headers=headers
+    )
+    if aoi_check.status_code == 200 and aoi_check.json()["data"]["owner"] is None:
+        print(
+            f"This is a system polygon checking for a user copy of {aoi_check.json()['data']['name']}"
+        )
+        user_poly = f"{aoi_check.json()['data']['name'].lower().replace(' ', '_')}_user"
+        id = poly_list(name=str(user_poly))
+        if id is not None:
+            print(f"Existing polygon name {user_poly} found")
+        else:
+            print(f"Polygon name does not exist: Creating {user_poly}")
+            data = {
+                "name": user_poly,
+                "unsaved": False,
+                "owner": "local",
+                "local": True,
+                "geom": {
+                    "type": "MultiPolygon",
+                    "coordinates": aoi_check.json()["data"]["geom"]["coordinates"],
+                },
+            }
+            response = requests.post(
+                "https://allencoralatlas.org/mapping/aois",
+                headers=headers,
+                data=json.dumps(data),
+            )
+            if response.status_code == 201:
+                print(
+                    f"Created {response.json()['data']['name']} with ID: {response.json()['data']['id']}"
+                )
+                id = response.json()["data"]["id"]
+            else:
+                print(
+                    f"Create failed with response {response.status_code} and error message {response.text}"
+                )
+        # print(id)
     data = {"datasets": "empty"}
     product_dict = {}
     response = requests.get(
@@ -420,7 +467,7 @@ def poly_download(id, local_path,format):
 
 
 def poly_download_from_parser(args):
-    poly_download(id=args.aoi, local_path=args.local,format=args.format)
+    poly_download(id=args.aoi, local_path=args.local, format=args.format)
 
 
 def main(args=None):
@@ -481,7 +528,9 @@ def main(args=None):
         "--local", help="Full path to folder to download files", required=True
     )
     optional_named = parser_poly_download.add_argument_group("Optional named arguments")
-    optional_named.add_argument("--format", help="Format types 'geojson', 'kml', 'shp', 'gpkg'", default=None)
+    optional_named.add_argument(
+        "--format", help="Format types 'geojson', 'kml', 'shp', 'gpkg'", default=None
+    )
     parser_poly_download.set_defaults(func=poly_download_from_parser)
 
     args = parser.parse_args()

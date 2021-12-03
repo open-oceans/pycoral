@@ -113,6 +113,10 @@ You can also specify a format now since v0.0.7
 
 ## Changelog
 
+#### v0.0.9
+- Better error handling and now users user agent.
+- Download tool for system polygon now creates a user copy to allow for all file types.
+
 #### v0.0.8
 - Better handles stats request.
 - Prints info if AOI exceeds 100 sqkm.
