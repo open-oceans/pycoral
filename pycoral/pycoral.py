@@ -409,6 +409,10 @@ def poly_download(id, local_path, format):
         )
         user_poly = f"{aoi_check.json()['data']['name'].lower().replace(' ', '_')}_user"
         id = poly_list(name=str(user_poly))
+        print("""
+            User copies of system polygon can take a long time to prepare for download
+            Once order is placed use Ctrl+C to terminate and wait for the download email to be sent
+            """)
         if id is not None:
             print(f"Existing polygon name {user_poly} found")
         else:
