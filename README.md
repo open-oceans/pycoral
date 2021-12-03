@@ -1,8 +1,7 @@
 # pycoral: Simple CLI for Allen Coral Atlas
 
 [![Twitter URL](https://img.shields.io/twitter/follow/samapriyaroy?style=social)](https://twitter.com/intent/follow?screen_name=samapriyaroy)
-![](https://tokei.rs/b1/github/samapriya/pycoral?category=code)
-![](https://tokei.rs/b1/github/samapriya/pycoral?category=files)
+[![Hits-of-Code](https://hitsofcode.com/github/samapriya/pycoral?branch=main)](https://hitsofcode.com/github/samapriya/pycoral?branch=main)
 ![PyPI - License](https://img.shields.io/pypi/l/pycoral)
 [![Downloads](https://pepy.tech/badge/pycoral)](https://pepy.tech/project/pycoral)
 [![CI pycoral](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml/badge.svg)](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml)
