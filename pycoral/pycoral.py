@@ -29,20 +29,21 @@ SOFTWARE.
 """
 __license__ = "MIT License"
 
-import requests
-import pkg_resources
-import json
-import getpass
-import sys
-import geojson
-import progressbar
 import argparse
-import time
 import base64
+import getpass
+import json
 import os
+import sys
+import time
 import webbrowser
-from area import area
 from os.path import expanduser
+
+import geojson
+import pkg_resources
+import progressbar
+import requests
+from area import area
 from bs4 import BeautifulSoup
 
 
@@ -63,6 +64,8 @@ class Solution:
 ob1 = Solution()
 
 # Get package version
+
+
 def pycoral_version():
     url = "https://pypi.org/project/pycoral/"
     source = requests.get(url)
@@ -106,6 +109,8 @@ def pycoral_version():
 pycoral_version()
 
 # Go to the readMe
+
+
 def readme():
     try:
         a = webbrowser.open("https://samapriya.github.io/pycoral/", new=2)
@@ -171,13 +176,16 @@ def tokenize():
         return response.json()["access_token"]
     else:
         print(
-            "Authentication failed with response code {}".format(response.status_code)
+            "Authentication failed with response code {}".format(
+                response.status_code)
         )
 
 
 # List or find system polygons and user polygons
 def poly_list(name):
     bearer = tokenize()
+    mapped_area_list = []
+    my_area_list = []
     headers = {
         "authority": "allencoralatlas.org",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
@@ -190,14 +198,32 @@ def poly_list(name):
         for things in response.json()["data"]:
             if name is None:
                 if not things["owner"] is None and things["is_group"] == False:
-                    print(f"User Poly - {things['name']} : {things['id']}")
+                    my_area_list.append([things["name"], things["id"]])
                 elif things["is_group"] == False:
-                    print(f"Default Poly - {things['name']} : {things['id']}")
+                    mapped_area_list.append([things["name"], things["id"]])
             elif name is not None:
                 if things["name"].strip().lower() == name.strip().lower():
-                    print(f"Matchind ID : {things['id']}")
+                    print(f"Matching ID : {things['name']}: {things['id']}")
                     print("")
                     return things["id"]
+        if mapped_area_list:
+            print("\n" + "================MAPPED AREA LIST================")
+            print(
+                "\n".join(
+                    [
+                        " : ".join([str(cell) for cell in row])
+                        for row in mapped_area_list
+                    ]
+                )
+            )
+        if my_area_list:
+            print("\n" + "================MY AREA LIST================")
+            print(
+                "\n".join(
+                    [" : ".join([str(cell) for cell in row])
+                     for row in my_area_list]
+                )
+            )
     else:
         print(
             f"Failed to fetch default or user areas with response : {response.status_code}"
@@ -226,7 +252,8 @@ def poly_create(filepath, name):
     if id is None:
         print(f"Polygon name does not exist: Creating {name}")
     else:
-        sys.exit(f"Existing polygon name {name} found: Try a different name or delete")
+        sys.exit(
+            f"Existing polygon name {name} found: Try a different name or delete")
     bearer = tokenize()
     headers = {
         "authority": "allencoralatlas.org",
@@ -286,7 +313,8 @@ def poly_delete(id):
     if response.status_code == 200:
         print(f"Deleted {id} successfully")
     else:
-        print(f"No results for name or id {id}: returned {response.status_code}")
+        print(
+            f"No results for name or id {id}: returned {response.status_code}")
 
 
 def poly_delete_from_parser(args):
@@ -345,7 +373,8 @@ def poly_stat(id, filepath):
         else:
             print("No mapped area for the AOI")
     else:
-        print(f"No results for name or id {id}: returned {response.status_code}")
+        print(
+            f"No results for name or id {id}: returned {response.status_code}")
 
 
 def poly_stat_from_parser(args):
@@ -360,7 +389,7 @@ def downloader(url, local_path):
     try:
         while response.status_code != 200:
             bar = progressbar.ProgressBar()
-            for _ in bar(range(60)):
+            for _ in bar(range(120)):
                 time.sleep(1)
             response = requests.request("HEAD", url)
         if not os.path.exists(local_path) and response.status_code == 200:
@@ -376,10 +405,11 @@ def downloader(url, local_path):
         else:
             if int(response.status_code) != 200:
                 print(
-                    f"Encountered error with code: {result.status_code} for {os.path.split(items['name'])[-1]}"
+                    f"Encountered error with code: {response.status_code} for {os.path.split(local_path)[-1]}"
                 )
             elif int(response.status_code) == 200:
-                print(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
+                print(
+                    f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
     except Exception as e:
         print(e)
     except KeyboardInterrupt:
@@ -409,10 +439,12 @@ def poly_download(id, local_path, format):
         )
         user_poly = f"{aoi_check.json()['data']['name'].lower().replace(' ', '_')}_user"
         id = poly_list(name=str(user_poly))
-        print("""
+        print(
+            """
             User copies of system polygon can take a long time to prepare for download
             Once order is placed use Ctrl+C to terminate and wait for the download email to be sent
-            """)
+            """
+        )
         if id is not None:
             print(f"Existing polygon name {user_poly} found")
         else:
@@ -452,7 +484,8 @@ def poly_download(id, local_path, format):
             if format in products["options"]["valid_formats"]:
                 product_dict[products["uuid"]] = format
             else:
-                product_dict[products["uuid"]] = products["options"]["default_format"]
+                product_dict[products["uuid"]
+                             ] = products["options"]["default_format"]
     data["datasets"] = product_dict
     response = requests.post(
         f"https://allencoralatlas.org/download/aois/{id}",
@@ -467,7 +500,8 @@ def poly_download(id, local_path, format):
         print(f'Submited {response.json()["data"]["name"]} for download')
         downloader(response.json()["data"]["url"], local_path)
     else:
-        print(f"No results for name or id {id}: returned {response.status_code}")
+        print(
+            f"No results for name or id {id}: returned {response.status_code}")
 
 
 def poly_download_from_parser(args):
@@ -475,7 +509,8 @@ def poly_download_from_parser(args):
 
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Simple CLI for Allen Coral Atlas")
+    parser = argparse.ArgumentParser(
+        description="Simple CLI for Allen Coral Atlas")
     subparsers = parser.add_subparsers()
 
     parser_read = subparsers.add_parser(
@@ -483,20 +518,23 @@ def main(args=None):
     )
     parser_read.set_defaults(func=read_from_parser)
 
-    parser_auth = subparsers.add_parser("auth", help="Saves your username and password")
+    parser_auth = subparsers.add_parser(
+        "auth", help="Saves your username and password")
     parser_auth.set_defaults(func=auth_from_parser)
 
     parser_poly_list = subparsers.add_parser(
         "aoi-find", help="Find AOI name and ID or list all"
     )
-    optional_named = parser_poly_list.add_argument_group("Optional named arguments")
+    optional_named = parser_poly_list.add_argument_group(
+        "Optional named arguments")
     optional_named.add_argument("--name", help="Pass area name", default=None)
     parser_poly_list.set_defaults(func=poly_list_from_parser)
 
     parser_poly_create = subparsers.add_parser(
         "aoi-create", help="Use a GeoJSON geometry file to create My Area AOI"
     )
-    required_named = parser_poly_create.add_argument_group("Required named arguments.")
+    required_named = parser_poly_create.add_argument_group(
+        "Required named arguments.")
     required_named.add_argument("--name", help="AOI name", required=True)
     required_named.add_argument(
         "--geometry", help="Full path to geometry.geojson file", required=True
@@ -507,7 +545,8 @@ def main(args=None):
         "aoi-stat",
         help="Print summary statistics for AOI using geoemtry file, name or ID",
     )
-    optional_named = parser_poly_stat.add_argument_group("Optional named arguments")
+    optional_named = parser_poly_stat.add_argument_group(
+        "Optional named arguments")
     optional_named.add_argument("--aoi", help="AOI name or ID", default=None)
     optional_named.add_argument(
         "--geometry", help="Full path to geometry.geojson file", default=None
@@ -517,7 +556,8 @@ def main(args=None):
     parser_poly_delete = subparsers.add_parser(
         "aoi-delete", help="Delete AOI from My Areas list"
     )
-    required_named = parser_poly_delete.add_argument_group("Required named arguments.")
+    required_named = parser_poly_delete.add_argument_group(
+        "Required named arguments.")
     required_named.add_argument("--aoi", help="AOI name or ID", required=True)
     parser_poly_delete.set_defaults(func=poly_delete_from_parser)
 
@@ -531,7 +571,8 @@ def main(args=None):
     required_named.add_argument(
         "--local", help="Full path to folder to download files", required=True
     )
-    optional_named = parser_poly_download.add_argument_group("Optional named arguments")
+    optional_named = parser_poly_download.add_argument_group(
+        "Optional named arguments")
     optional_named.add_argument(
         "--format", help="Format types 'geojson', 'kml', 'shp', 'gpkg'", default=None
     )

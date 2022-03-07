@@ -1,5 +1,10 @@
 # Changelog
 
+#### v0.1.0
+- Better site parsing
+- Better error handling for Download
+- Increase wait time for download to 2 minutes
+
 #### v0.0.9
 - Better error handling and now users user agent.
 - Download tool for system polygon now creates a user copy to allow for all file types.
