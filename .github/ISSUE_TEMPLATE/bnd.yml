@@ -1,7 +1,7 @@
-name: Bring your own data to awesome-gee-catalog
-description: This template allows the owners or creators or datasets to submit their data
+name: Suggest new community data for awesome-gee-catalog
+description: This template allows the users to submit datasets for consideration into community catalog
 title: "[Dataset Title/Name]: "
-labels: ["BYOD"]
+labels: ["Dataset"]
 assignees:
   - samapriya, valpasq, edtrochim
 body:
@@ -21,7 +21,7 @@ body:
     id: Dataset-description
     attributes:
       label: Dataset description
-      description: Include download links, citation and DOI information
+      description: Include download links, citation and DOI information including dataset owner
     validations:
       required: true
   - type: textarea
