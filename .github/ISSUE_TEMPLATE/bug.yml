@@ -27,8 +27,8 @@ body:
   - type: textarea
     id: Clear_and_concise_description_about_the_bug
     attributes:
-      label: What happened?
-      description: Also tell us, what did you expect to happen?
+      label: Describe the bug
+      description: Add as much information as you can about the bug
       value: "Describe the bug"
     validations:
       required: true
