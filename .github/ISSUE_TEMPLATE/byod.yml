@@ -40,7 +40,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: Earth Engine Snippet
+    id: Earth-Engine-Snippet
     attributes:
       label: Earth Engine Snippet if dataset already in GEE
       description: Include the GEE dataset information and example code snippet
