@@ -17,26 +17,11 @@ body:
       placeholder: ex. email@example.com
     validations:
       required: false
-  - type: input
-    id: Dataset-URL
-    attributes:
-      label: Provide Dataset Link
-      description: Provide a link to the existing dataset page ex. https://gee-community-catalog.org/projects/geomorpho90/
-    validations:
-      required: true
   - type: textarea
     id: Dataset-description
     attributes:
       label: Dataset description
       description: Include download links, citation and DOI information
-    validations:
-      required: true
-  - type: textarea
-    id: License-Information
-    attributes:
-      label: Enter license information
-      description: License information allows us to decide if the dataset can be included
-      value: "Enter License information ex: APAHCE 2.0, CC-BY-4.0"
     validations:
       required: true
   - type: textarea
@@ -53,10 +38,13 @@ body:
     validations:
       required: true
   - type: textarea
-    id: additional_info
+    id: License-Information
     attributes:
-      label: Relevant additional information
-      description: If applicable, add screenshots/error messages/logs to help explain your problem.
+      label: Enter license information
+      description: License information allows us to decide if the dataset can be included
+      value: "Enter License information ex: APAHCE 2.0, CC-BY-4.0"
+    validations:
+      required: true
   - type: checkboxes
     id: terms
     attributes:
