@@ -113,10 +113,10 @@ pycoral_version()
 
 def readme():
     try:
-        a = webbrowser.open("https://samapriya.github.io/pycoral/", new=2)
+        a = webbrowser.open("https://pycoral.openoceans.xyz", new=2)
         if a == False:
             print("Your setup does not have a monitor to display the webpage")
-            print(" Go to {}".format("https://samapriya.github.io/pycoral/"))
+            print(" Go to {}".format("https://pycoral.openoceans.xyz"))
     except Exception as e:
         print(e)
 
