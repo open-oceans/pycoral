@@ -30,6 +30,12 @@ jobs:
         continue-on-error: true
         run: brew install gdal
         if: matrix.os == 'macos-latest'
+      - name: Install Dependencies (Ubuntu)
+        continue-on-error: true
+        run: sudo add-apt-repository ppa:ubuntugis/ppa -y
+        sudo apt-get update
+        sudo apt-get install python3-gdal -y
+        if: matrix.os == 'ubuntu-latest'
       - name: Test package
         run: |
           pip install -r requirements.txt
