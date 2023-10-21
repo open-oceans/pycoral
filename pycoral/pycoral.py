@@ -42,18 +42,13 @@ import time
 import webbrowser
 from os.path import expanduser
 
-import geojson
 import geopandas as gpd
 import pkg_resources
 import progressbar
 import requests
 from area import area
-from tenacity import (
-    retry,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_exponential,
-)
+from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
+                      wait_exponential)
 
 # Set a custom log formatter
 logging.basicConfig(
