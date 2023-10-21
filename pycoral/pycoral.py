@@ -42,7 +42,6 @@ import time
 import webbrowser
 from os.path import expanduser
 
-import geopandas as gpd
 import pkg_resources
 import progressbar
 import requests
@@ -100,6 +99,23 @@ if str(platform.system().lower()) == "windows":
             subprocess.call("pipgeo sys", shell=True)
     except ModuleNotFoundError or ImportError:
         subprocess.call("pipgeo sys", shell=True)
+    except Exception as e:
+        logging.exception(e)
+    try:
+        import geopandas as gpd
+    except ImportError:
+        subprocess.call(f"{sys.executable}" + " -m pip install geopandas", shell=True)
+        import geopandas as gpd
+    except Exception as e:
+        logging.exception(e)
+else:
+    try:
+        import gdal
+    except ImportError:
+        try:
+            from osgeo import gdal
+        except ModuleNotFoundError:
+            sys.exit("Install GDAL")
     except Exception as e:
         logging.exception(e)
     try:
@@ -615,12 +631,12 @@ def main(args=None):
     parser_poly_list.set_defaults(func=poly_list_from_parser)
 
     parser_poly_create = subparsers.add_parser(
-        "aoi-create", help="Use a GeoJSON geometry file to create My Area AOI"
+        "aoi-create", help="Use a GeoJSON/Shapefile geometry file to create My Area AOI"
     )
     required_named = parser_poly_create.add_argument_group("Required named arguments.")
     required_named.add_argument("--name", help="AOI name", required=True)
     required_named.add_argument(
-        "--geometry", help="Full path to geometry.geojson file", required=True
+        "--geometry", help="Full path to geometry.geojson/.shp file", required=True
     )
     parser_poly_create.set_defaults(func=poly_create_from_parser)
 
@@ -631,7 +647,7 @@ def main(args=None):
     optional_named = parser_poly_stats.add_argument_group("Optional named arguments")
     optional_named.add_argument("--aoi", help="AOI name or ID", default=None)
     optional_named.add_argument(
-        "--geometry", help="Full path to geometry.geojson file", default=None
+        "--geometry", help="Full path to geometry.geojson/.shp file", default=None
     )
     parser_poly_stats.set_defaults(func=poly_stats_from_parser)
 
