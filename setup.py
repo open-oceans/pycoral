@@ -12,14 +12,14 @@ setuptools.setup(
     version="0.1.1",
     packages=find_packages(),
     install_requires=[
-        "requests>=2.23.1",
-        "progressbar2>=3.53.1",
-        "area>=1.1.1",
+        'requests>=2.23.1',
+        'progressbar2>=3.53.1',
+        'area>=1.1.1',
         'tenacity>=8.0.1',
         'pyproj>=1.9.5.1;platform_system!="Windows"',
         'shapely>=1.7.1;platform_system!="Windows"',
         'fiona>=1.8.20;platform_system!="Windows"',
-        'geopandas>=0.9.0;platform_system!="Windows"'
+        'geopandas>=0.9.0;platform_system!="Windows"',
     ],
     license="MIT",
     long_description=open("README.md").read(),
