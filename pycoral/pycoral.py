@@ -110,15 +110,6 @@ if str(platform.system().lower()) == "windows":
         logging.exception(e)
 else:
     try:
-        import gdal
-    except ImportError:
-        try:
-            from osgeo import gdal
-        except ModuleNotFoundError:
-            sys.exit("Install GDAL")
-    except Exception as e:
-        logging.exception(e)
-    try:
         import geopandas as gpd
     except ImportError:
         subprocess.call(f"{sys.executable}" + " -m pip install geopandas", shell=True)
