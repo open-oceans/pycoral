@@ -31,6 +31,7 @@ __license__ = "MIT License"
 
 import argparse
 import base64
+import csv
 import getpass
 import json
 import logging
@@ -42,6 +43,7 @@ import time
 import webbrowser
 from os.path import expanduser
 
+import pandas as pd
 import pkg_resources
 import progressbar
 import requests
@@ -119,6 +121,7 @@ else:
 
 lpath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(lpath)
+valid_status_codes = [201, 202, 204]
 
 
 # Get package version
@@ -167,8 +170,6 @@ pycoral_version()
 
 
 # Go to the readMe
-
-
 def readme():
     try:
         a = webbrowser.open("https://pycoral.openoceans.xyz", new=2)
@@ -242,6 +243,141 @@ def tokenize():
         print(f"Authentication failed with response code {response.status_code}")
 
 
+def getarea(geom):
+    obj = {"type": "Polygon", "coordinates": []}
+    obj["coordinates"] = [geom]
+    poly_area = area(obj)
+    area_in_sqkm = round(poly_area / 1000000, 2)
+    return area_in_sqkm
+
+
+def extract_coordinates(file_path):
+    try:
+        gdf = gpd.read_file(file_path)
+        gdf = gdf.to_crs(epsg=4326)
+        geojson = gdf.to_json()
+        feature_collection = json.loads(geojson)
+        coordinates = []
+        for feature in feature_collection["features"]:
+            geometry = feature["geometry"]
+            if len(feature_collection["features"]) == 1:
+                for polygon in geometry["coordinates"]:
+                    coordinates.append(polygon)
+            elif len(feature_collection["features"]) > 1:
+                for polygon in geometry["coordinates"]:
+                    coordinates.append(polygon)
+            else:
+                sys.exit(f"Not a polygon or multi-polygon feature with coordinates")
+
+        if isinstance(coordinates, list):
+            return coordinates
+        else:
+            print(f"Coordinates are not a list: {coordinates}")
+    except Exception as error:
+        return str(error)
+
+
+@retry(
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    stop=stop_after_attempt(5),
+    reraise=True,
+    retry=retry_if_exception_type(Exception),
+)
+def stats_fetch(id):
+    headers = tokenize()
+    response = requests.get(
+        f"https://allencoralatlas.org/mapping/aois/{id}/stats", headers=headers
+    )
+    if response.status_code == 204:
+        raise Exception("Calculating stats: Retrying....")
+    elif response.status_code == 200:
+        return response
+    else:
+        sys.exit(
+            f"Fetching stats failed with response code {response.status_code}: {response.json()['message']}"
+        )
+
+
+def generate_buffer_meter(lat, lng, radius):
+    data = pd.DataFrame({"Longitude": [lng], "Latitude": [lat]})
+    data = gpd.GeoDataFrame(
+        data,
+        geometry=gpd.points_from_xy(data.Longitude, data.Latitude, crs="epsg:4326"),
+    )
+    data = data.to_crs("EPSG:900913")
+    data["geometry"] = data["geometry"].buffer(radius, cap_style=3)
+    data = data.to_crs("epsg:4326")
+    bound = json.loads(data.to_json())
+    coord = bound["features"][0]["geometry"]["coordinates"]
+    return coord
+
+
+def point_handler(data, buffer):
+    coordinates_list = []
+    with open(data, "r", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for i, row in enumerate(reader):
+            try:
+                lat = float(row["latitude"])
+                lon = float(row["longitude"])
+                coordinates = generate_buffer_meter(lat, lon, buffer)
+                coordinates_list.append({i + 1: coordinates})
+            except Exception as error:
+                print(error)
+    if coordinates_list:
+        return coordinates_list
+    else:
+        return []
+
+
+def downloader(url, local_path):
+    response = requests.request("HEAD", url)
+    filename = url.split("/")[-1]
+    local_path = os.path.join(local_path, filename)
+    if os.path.exists(local_path):
+        sys.exit(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
+    else:
+        print(
+            "\n"
+            + """
+            Waiting for zip file to complete. Depending on your AOI size the system can take a long time to prepare for download
+            Once order is placed you can use Ctrl+C to terminate and wait for the download email to be sent
+            & then try the download tool again
+            """
+            + "\n"
+        )
+    try:
+        while response.status_code != 200:
+            bar = progressbar.ProgressBar()
+            for _ in bar(range(120)):
+                time.sleep(1)
+            response = requests.request("HEAD", url)
+        if not os.path.exists(local_path) and response.status_code == 200:
+            print(f"Downloading to :{local_path}")
+            response = requests.get(url)
+            f = open(local_path, "wb")
+            for chunk in response.iter_content(chunk_size=512 * 1024):
+                if chunk:
+                    f.write(chunk)
+            f.close()
+        elif response.status_code == 429:
+            raise Exception("rate limit error")
+        else:
+            if int(response.status_code) != 200:
+                print(
+                    f"Encountered error with code: {response.status_code} for {os.path.split(local_path)[-1]}"
+                )
+            elif int(response.status_code) == 200:
+                print(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
+    except Exception as e:
+        print(e)
+    except KeyboardInterrupt:
+        sys.exit("\n" + "Exited by user")
+
+
+############################################################main functions ##########################################################
+
+
 # List or find system polygons and user polygons
 def poly_list(name):
     headers = tokenize()
@@ -289,40 +425,6 @@ def poly_list_from_parser(args):
     poly_list(name=args.name)
 
 
-def getarea(geom):
-    obj = {"type": "Polygon", "coordinates": []}
-    obj["coordinates"] = [geom]
-    poly_area = area(obj)
-    area_in_sqkm = round(poly_area / 1000000, 2)
-    return area_in_sqkm
-
-
-def extract_coordinates(file_path):
-    try:
-        gdf = gpd.read_file(file_path)
-        gdf = gdf.to_crs(epsg=4326)
-        geojson = gdf.to_json()
-        feature_collection = json.loads(geojson)
-        coordinates = []
-
-        for feature in feature_collection["features"]:
-            geometry = feature["geometry"]
-            if geometry["type"] == "Polygon":
-                coordinates.extend(geometry["coordinates"][0])
-            elif geometry["type"] == "MultiPolygon":
-                for polygon in geometry["coordinates"]:
-                    coordinates.extend(polygon[0])
-            else:
-                sys.exit(f"Not a polygon or multi-polygon feature with coordinates")
-
-        if isinstance(coordinates, list):
-            return coordinates
-        else:
-            print(f"Coordinates are not a list: {coordinates}")
-    except Exception as error:
-        return str(error)
-
-
 def poly_create(filepath, name):
     if name is not None:
         if name.isdigit():
@@ -337,20 +439,20 @@ def poly_create(filepath, name):
         sys.exit(f"Existing polygon name {name} found: Try a different name or delete")
     headers = tokenize()
     coordinates = extract_coordinates(filepath)
-    area_value = getarea(coordinates)
+    area_value = getarea(coordinates[0])
     logging.info(f"Total area in sqkm {round(area_value,2)}")
-    data = {
+    payload = {
         "name": name,
         "unsaved": False,
         "owner": "local",
         "local": True,
         "geom": {"type": "Polygon", "coordinates": []},
     }
-    data["geom"]["coordinates"] = [coordinates]
+    payload["geom"]["coordinates"] = coordinates
     response = requests.post(
         "https://allencoralatlas.org/mapping/aois",
         headers=headers,
-        data=json.dumps(data),
+        data=json.dumps(payload),
     )
     if response.status_code == 201:
         logging.info(
@@ -390,27 +492,6 @@ def poly_delete_from_parser(args):
     poly_delete(id=args.aoi)
 
 
-@retry(
-    wait=wait_exponential(multiplier=1, min=4, max=10),
-    stop=stop_after_attempt(5),
-    reraise=True,
-    retry=retry_if_exception_type(Exception),
-)
-def stats_fetch(id):
-    headers = tokenize()
-    response = requests.get(
-        f"https://allencoralatlas.org/mapping/aois/{id}/stats", headers=headers
-    )
-    if response.status_code == 204:
-        raise Exception("Calculating stats: Retrying....")
-    elif response.status_code == 200:
-        return response
-    else:
-        sys.exit(
-            f"Fetching stats failed with response code {response.status_code}: {response.json()['message']}"
-        )
-
-
 def poly_stats(id, filepath):
     headers = tokenize()
     if id is not None:
@@ -421,16 +502,19 @@ def poly_stats(id, filepath):
         response = stats_fetch(id)
     elif id is None and filepath is not None:
         coordinates = extract_coordinates(filepath)
-        area_value = getarea(coordinates)
+        area_value = getarea(coordinates[0])
+        logging.info(
+            f"Processing {os.path.basename(filepath)} with an area of {area_value} sqkm"
+        )
         if int(area_value) < 100:
             data = {"geom": {"type": "Polygon", "coordinates": []}}
-            data["geom"]["coordinates"] = [coordinates]
+            data["geom"]["coordinates"] = coordinates
             response = requests.post(
                 "https://allencoralatlas.org/mapping/aois/stats",
                 headers=headers,
                 data=json.dumps(data),
             )
-            while response.status_code != 200:
+            while response.status_code != 200 and response.status_code in valid_status_codes:
                 time.sleep(5)
                 response = requests.post(
                     "https://allencoralatlas.org/mapping/aois/stats",
@@ -472,49 +556,149 @@ def poly_stats_from_parser(args):
     poly_stats(id=args.aoi, filepath=args.geometry)
 
 
-def downloader(url, local_path):
-    response = requests.request("HEAD", url)
-    filename = url.split("/")[-1]
-    local_path = os.path.join(local_path, filename)
-    if os.path.exists(local_path):
-        sys.exit(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
-    else:
-        print(
-            "\n"
-            + """
-            Waiting for zip file to complete. Depending on your AOI size the system can take a long time to prepare for download
-            Once order is placed you can use Ctrl+C to terminate and wait for the download email to be sent
-            & then try the download tool again
-            """
-            + "\n"
-        )
+def stats_write(response, export, suffix, index, row_count, buffer):
     try:
-        while response.status_code != 200:
-            bar = progressbar.ProgressBar()
-            for _ in bar(range(120)):
-                time.sleep(1)
-            response = requests.request("HEAD", url)
-        if not os.path.exists(local_path) and response.status_code == 200:
-            print(f"Downloading to :{local_path}")
-            response = requests.get(url)
-            f = open(local_path, "wb")
-            for chunk in response.iter_content(chunk_size=512 * 1024):
-                if chunk:
-                    f.write(chunk)
-            f.close()
-        elif response.status_code == 429:
-            raise Exception("rate limit error")
+        if "map_assets" in response.json()["data"]["stats"]:
+            logging.info(f"Processed {index} of {row_count} geometries")
+            json_object = response.json()["data"]["stats"]["map_assets"]
+            class_types = ["geomorphic", "benthic"]
+            for layer in json_object:
+                if layer["class_type"] in class_types:
+                    dataframe = pd.DataFrame(layer["classes"])
+                    if buffer is not None:
+                        file_path = os.path.join(
+                            export,
+                            f"{suffix}_{buffer}_row{index}_{layer['class_type']}.csv",
+                        )
+                    else:
+                        file_path = os.path.join(
+                            export, f"{suffix}_row{index}_{layer['class_type']}.csv"
+                        )
+                    dataframe.to_csv(file_path, index=False)
+                elif layer["class_type"] == "reefextent":
+                    logging.info(
+                        f"Processed coverage for reefextent {layer['classes'][0]['cover_sqkm']}"
+                        + "\n"
+                    )
         else:
-            if int(response.status_code) != 200:
-                print(
-                    f"Encountered error with code: {response.status_code} for {os.path.split(local_path)[-1]}"
-                )
-            elif int(response.status_code) == 200:
-                print(f"File already exists SKIPPING: {os.path.split(local_path)[-1]}")
-    except Exception as e:
-        print(e)
-    except KeyboardInterrupt:
-        sys.exit("\n" + "Exited by user")
+            logging.exception(
+                f"No mapped assets in the area of interest try a larger area"
+            )
+    except Exception as error:
+        print(error)
+
+
+def stats_download(id, data, buffer, export):
+    headers = tokenize()
+    if id is not None:
+        if id.isdigit():
+            id = str(id)
+        else:
+            id = poly_list(name=str(id))
+        response = stats_fetch(id)
+        if response.json()["data"]["stats"]["map_assets"]:
+            logging.info(f"Processed AOI ID {id}")
+            json_object = response.json()["data"]["stats"]["map_assets"]
+            class_types = ["geomorphic", "benthic"]
+            for layer in json_object:
+                if layer["class_type"] in class_types:
+                    dataframe = pd.DataFrame(layer["classes"])
+                    dataframe.to_csv(
+                        os.path.join(export, f"AOI_{id}_{layer['class_type']}.csv"),
+                        index=False,
+                    )
+                elif layer["class_type"] == "reefextent":
+                    logging.info(
+                        f"Processed coverage for reefextent {layer['classes'][0]['cover_sqkm']}"
+                        + "\n"
+                    )
+        else:
+            logging.exception(f"No mapped assets in the area of interest")
+            sys.exit()
+    elif id is None and data is not None:
+        suffix = os.path.basename(data).split(".")[0]
+        if data.endswith(".csv"):
+            logging.info(f"Processing {os.path.basename(data)}")
+            if buffer is None:
+                logging.info("No buffer specified, using default buffer of 1000m")
+                buffer = 1000
+            else:
+                buffer = int(buffer)
+                logging.info(f"Using buffer of {buffer} meters")
+            row_count = len(pd.read_csv(data))
+            parsed_geometry = point_handler(data, buffer)
+        elif data.endswith(".geojson") or data.endswith(".shp"):
+            logging.info(f"Processing {os.path.basename(data)}")
+            parsed_geometry = [
+                {index + 1: [geometry]}
+                for index, geometry in enumerate(extract_coordinates(data))
+            ]
+            row_count = len(parsed_geometry)
+        else:
+            logging.exception(f"{data} is not a supported file type")
+            sys.exit()
+        for geometry in parsed_geometry:
+            try:
+                for index, coordinates in geometry.items():
+                    area_value = getarea(coordinates[0])
+                    logging.info(
+                        f"Processing {index} of {row_count} geometries with an area of {area_value} sqkm"
+                    )
+                    if int(area_value) < 100:
+                        data = {"geom": {"type": "Polygon", "coordinates": []}}
+                        data["geom"]["coordinates"] = coordinates
+                        response = requests.post(
+                            "https://allencoralatlas.org/mapping/aois/stats",
+                            headers=headers,
+                            data=json.dumps(data),
+                        )
+                        while response.status_code != 200:
+                            time.sleep(5)
+                            response = requests.post(
+                                "https://allencoralatlas.org/mapping/aois/stats",
+                                headers=headers,
+                                data=json.dumps(data),
+                            )
+                        if buffer is not None:
+                            stats_write(
+                                response, export, suffix, index, row_count, buffer
+                            )
+                        else:
+                            stats_write(response, export, suffix, index, row_count,buffer=None)
+                    elif int(area_value) > 100 and int(area_value) < 5000000:
+                        logging.info(
+                            "AOI area exceeds 100 sqkm: Creating Polygon to run stats"
+                        )
+                        current_timestamp = str(time.time())
+                        message_bytes = current_timestamp.encode("ascii")
+                        base64_bytes = base64.b64encode(message_bytes)
+                        name = base64_bytes.decode("ascii")
+                        id = poly_create(data, name)
+                        response = stats_fetch(id)
+                        if buffer is not None:
+                            stats_write(
+                                response, export, suffix, index, row_count, buffer
+                            )
+                        else:
+                            stats_write(response, export, suffix, index, row_count,buffer=None)
+                    elif int(area_value) >= 5000000:
+                        logging.error(
+                            "AOI area exceeds 5000000 sqkm max allowed by Allen coral Atlas: Reduce AOI size"
+                        )
+                        sys.exit()
+            except Exception as error:
+                logging.exception(error)
+    else:
+        sys.exit("Pass valid geometry, name or ID")
+
+
+# result = stats_download(r'C:\Users\samapriya\Downloads\large_test.geojson',800,r'C:\tmp')
+
+
+def stats_download_from_parser(args):
+    stats_download(
+        id=args.aoi, data=args.geometry, export=args.local, buffer=args.buffer
+    )
 
 
 def poly_download(id, local_path, format):
@@ -648,6 +832,28 @@ def main(args=None):
     required_named = parser_poly_delete.add_argument_group("Required named arguments.")
     required_named.add_argument("--aoi", help="AOI name or ID", required=True)
     parser_poly_delete.set_defaults(func=poly_delete_from_parser)
+
+    parser_stats_download = subparsers.add_parser(
+        "stats-download",
+        help="Use a AOI/CSV/GeoJSON/Shapefile geometry file to download AOI stats",
+    )
+    required_named = parser_stats_download.add_argument_group(
+        "Required named arguments."
+    )
+    required_named.add_argument(
+        "--local", help="Full path to folder to download stats files", required=True
+    )
+    optional_named = parser_stats_download.add_argument_group(
+        "Optional named arguments"
+    )
+    optional_named.add_argument(
+        "--geometry", help="Full path to geometry .csv/.geojson/.shp file", default=None
+    )
+    optional_named.add_argument("--aoi", help="AOI name or ID", default=None)
+    optional_named.add_argument(
+        "--buffer", help="Buffer length for square buffer in meters", default=None
+    )
+    parser_stats_download.set_defaults(func=stats_download_from_parser)
 
     parser_poly_download = subparsers.add_parser(
         "aoi-download", help="Download files using name or ID"

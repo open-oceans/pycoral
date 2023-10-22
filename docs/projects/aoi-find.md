@@ -2,7 +2,7 @@
 
 The aoi-find tool can be handy if you are looking for a specific aoi-name and is mostly useful to list all allowed polygons including those that are default or stored by the atlas vs your own areas of interest.
 
-![pycoral_aoi-find](https://user-images.githubusercontent.com/6677629/118433340-6296ba80-b6a0-11eb-83f3-e2376f4fa5a6.gif)
+![pycoral_aoi_find](https://github.com/open-oceans/pycoral/assets/6677629/15fb0b92-af15-4dcd-8990-7bc1f643c6c7)
 
 ```
 usage: pycoral aoi-find [-h] [--name NAME]

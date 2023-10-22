@@ -1,5 +1,12 @@
 # Changelog
 
+#### v0.2.0
+- Improved area and file format parsing
+- Better logging support and error reporting
+- Added support for GeoJSON, shapefile and CSV imports
+- Added new aoi statistics support tool for stats export
+- Major overall improvements and updates
+
 #### v0.1.0
 - Better site parsing
 - Better error handling for Download

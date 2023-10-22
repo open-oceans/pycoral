@@ -135,6 +135,7 @@ nav:
       - Create Area of Interest: projects/aoi-create.md
   - Stats, Delete & Download:
       - Print stats: projects/aoi-stats.md
+      - Download stats: projects/stats-download.md
       - Delete Area of Interest: projects/aoi-delete.md
       - Download data: projects/aoi-download.md
   - Changelog: changelog.md
