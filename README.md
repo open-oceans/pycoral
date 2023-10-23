@@ -7,7 +7,7 @@
 [![Donate](https://img.shields.io/badge/Donate-Buy%20me%20a%20Coffee-teal)](https://www.buymeacoffee.com/samapriya)
 [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/samapriya)
 [![Hits-of-Code](https://hitsofcode.com/github/samapriya/pycoral?branch=main)](https://hitsofcode.com/github/samapriya/pycoral?branch=main)
-[![PyPI version](https://badge.fury.io/py/geeup.svg)](https://badge.fury.io/py/geeup)
+[![PyPI version](https://badge.fury.io/py/pycoral.svg)](https://badge.fury.io/py/pycoral)
 [![Downloads](https://pepy.tech/badge/pycoral)](https://pepy.tech/project/pycoral)
 [![CI pycoral](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml/badge.svg)](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5497093.svg)](https://doi.org/10.5281/zenodo.5497093)
