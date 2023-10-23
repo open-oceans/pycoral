@@ -7,7 +7,7 @@
 [![Donate](https://img.shields.io/badge/Donate-Buy%20me%20a%20Coffee-teal)](https://www.buymeacoffee.com/samapriya)
 [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/samapriya)
 [![Hits-of-Code](https://hitsofcode.com/github/samapriya/pycoral?branch=main)](https://hitsofcode.com/github/samapriya/pycoral?branch=main)
-![PyPI - License](https://img.shields.io/pypi/l/pycoral)
+[![PyPI version](https://badge.fury.io/py/geeup.svg)](https://badge.fury.io/py/geeup)
 [![Downloads](https://pepy.tech/badge/pycoral)](https://pepy.tech/project/pycoral)
 [![CI pycoral](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml/badge.svg)](https://github.com/samapriya/pycoral/actions/workflows/package_ci.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5497093.svg)](https://doi.org/10.5281/zenodo.5497093)
@@ -19,6 +19,6 @@ The Allen Coral Atlas was conceived and funded by the late Paul Allen’s Vulcan
 #### Citation
 
 ```
-Samapriya Roy. (2021). samapriya/pycoral: Simple CLI for Allen Coral Atlas (0.0.9).
-Zenodo. https://doi.org/10.5281/zenodo.5752074
+Samapriya Roy. (2023). open-oceans/pycoral: Simple CLI for Allen Coral Atlas (0.2.0).
+Zenodo. https://doi.org/10.5281/zenodo.10035572
 ```

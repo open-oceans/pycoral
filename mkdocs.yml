@@ -6,6 +6,7 @@ site_url: https://github.com/samapriya
 # Repository
 repo_name: pycoral
 repo_url: https://github.com/open-oceans/pycoral
+edit_uri: blob/main/docs/
 
 # Copyright
 copyright: "Copyright &copy; 2021 - 2024 Samapriya Roy"
